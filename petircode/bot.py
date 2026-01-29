@@ -75,10 +75,10 @@ Send me any message and I'll echo it back!
             MessageHandler(filters.TEXT & ~filters.COMMAND, self.echo_message)
         )
 
-    async def run(self):
+    def run(self):
         """Run the bot"""
         config.validate()
         self.application = Application.builder().token(config.TELEGRAM_BOT_TOKEN).build()
         self.setup_handlers()
         logger.info("Starting PetriCode bot...")
-        await self.application.run_polling(allowed_updates=Update.ALL_TYPES)
+        self.application.run_polling(allowed_updates=Update.ALL_TYPES)

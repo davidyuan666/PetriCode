@@ -1,7 +1,6 @@
 """
 Main entry point for PetriCode bot
 """
-import asyncio
 import logging
 from .bot import PetriBot
 from .config import config
@@ -15,15 +14,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def main():
+def main():
     """Main function"""
     try:
         bot = PetriBot()
-        await bot.run()
+        bot.run()
     except Exception as e:
         logger.error(f"Error running bot: {e}")
         raise
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
