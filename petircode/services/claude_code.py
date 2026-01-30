@@ -30,10 +30,11 @@ async def execute_claude_code(operation: str, timeout: int = None) -> dict:
         timeout = config.CLAUDE_TIMEOUT
 
     # Build PowerShell command to change directory and run claude CLI
+    # Add --dangerously-skip-permissions to skip permission prompts
     powershell_cmd = (
         f'powershell.exe -Command "'
         f'cd \'{config.CLAUDE_WORK_DIR}\'; '
-        f'claude \'{operation}\'"'
+        f'claude --dangerously-skip-permissions \'{operation}\'"'
     )
 
     logger.info(f"Executing Claude CLI command: {operation}")
