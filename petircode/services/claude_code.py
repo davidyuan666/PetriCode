@@ -1,8 +1,9 @@
 """
-Claude Code CLI service for executing computer operations
+System command execution service for computer operations
 """
 import logging
 import asyncio
+import os
 from ..config import config
 
 logger = logging.getLogger(__name__)
@@ -10,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 async def execute_claude_code(operation: str, timeout: int = None) -> dict:
     """
-    Execute Claude Code CLI operation via PowerShell in specified working directory
+    Execute system command via PowerShell in specified working directory
 
     Args:
-        operation: The operation description to execute
+        operation: The command to execute
         timeout: Timeout in seconds (default: from config)
 
     Returns:
@@ -29,14 +30,18 @@ async def execute_claude_code(operation: str, timeout: int = None) -> dict:
     if timeout is None:
         timeout = config.CLAUDE_TIMEOUT
 
-    # Build PowerShell command to change directory and run claude
+    # Parse operation to system command
+    command = _parse_operation_to_command(operation)
+
+    # Build PowerShell command to change directory and run command
     powershell_cmd = (
-        f'powershell.exe -Command "'
+        f'powershell.exe -NoProfile -Command "'
         f'cd \'{config.CLAUDE_WORK_DIR}\'; '
-        f'{config.CLAUDE_CLI_PATH} \'{operation}\'"'
+        f'{command}"'
     )
 
-    logger.info(f"Executing command: {powershell_cmd}")
+    logger.info(f"Executing command: {command}")
+    logger.info(f"Working directory: {config.CLAUDE_WORK_DIR}")
 
     try:
         # Create subprocess to run PowerShell command
@@ -71,5 +76,57 @@ async def execute_claude_code(operation: str, timeout: int = None) -> dict:
         }
 
     except Exception as e:
-        logger.error(f"Error executing Claude Code: {e}", exc_info=True)
+        logger.error(f"Error executing command: {e}", exc_info=True)
         raise
+
+
+def _parse_operation_to_command(operation: str) -> str:
+    """
+    Parse natural language operation to system command
+
+    Args:
+        operation: Natural language description or direct command
+
+    Returns:
+        System command string
+    """
+    operation_lower = operation.lower().strip()
+
+    # List files
+    if 'list' in operation_lower and 'file' in operation_lower:
+        return 'Get-ChildItem | Format-Table Name, Length, LastWriteTime'
+
+    # Show current directory
+    if 'current' in operation_lower and ('directory' in operation_lower or 'dir' in operation_lower):
+        return 'Get-Location'
+
+    # Create file
+    if 'create' in operation_lower and 'file' in operation_lower:
+        # Extract filename
+        words = operation.split()
+        filename = None
+        for i, word in enumerate(words):
+            if word.lower() in ['file', 'named', 'called', 'name']:
+                if i + 1 < len(words):
+                    filename = words[i + 1].strip('.,;:')
+                    break
+
+        if filename:
+            # Check if content is specified
+            if 'content' in operation_lower or 'with' in operation_lower:
+                # Extract content after "content" or "with"
+                content_start = max(
+                    operation.lower().find('content'),
+                    operation.lower().find('with')
+                )
+                if content_start > 0:
+                    content = operation[content_start:].split(None, 1)
+                    if len(content) > 1:
+                        content_text = content[1].strip('"\'')
+                        return f'Set-Content -Path "{filename}" -Value "{content_text}"'
+
+            # Create empty file
+            return f'New-Item -Path "{filename}" -ItemType File -Force'
+
+    # Default: treat as direct PowerShell command
+    return operation
