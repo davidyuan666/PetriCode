@@ -34,6 +34,50 @@ def get_bot() -> Bot:
     return bot
 
 
+async def send_message(arguments: dict) -> list[TextContent]:
+    """Send a message to Telegram"""
+    chat_id = arguments.get("chat_id")
+    text = arguments.get("text")
+
+    if not chat_id or not text:
+        return [TextContent(type="text", text="Error: chat_id and text are required")]
+
+    try:
+        telegram_bot = get_bot()
+        message = await telegram_bot.send_message(chat_id=chat_id, text=text)
+
+        result = f"Message sent successfully!\nChat ID: {message.chat_id}\nMessage ID: {message.message_id}"
+        return [TextContent(type="text", text=result)]
+    except TelegramError as e:
+        return [TextContent(type="text", text=f"Telegram error: {str(e)}")]
+
+
+async def get_updates(arguments: dict) -> list[TextContent]:
+    """Get recent updates from Telegram"""
+    limit = arguments.get("limit", 10)
+
+    try:
+        telegram_bot = get_bot()
+        updates = await telegram_bot.get_updates(limit=limit)
+
+        if not updates:
+            return [TextContent(type="text", text="No recent messages")]
+
+        result = "Recent messages:\n\n"
+        for update in updates[-limit:]:
+            if update.message:
+                msg = update.message
+                username = msg.from_user.username if msg.from_user.username else "N/A"
+                result += f"From: {msg.from_user.first_name} (@{username})\n"
+                result += f"Chat ID: {msg.chat_id}\n"
+                result += f"Text: {msg.text}\n"
+                result += f"Date: {msg.date}\n\n"
+
+        return [TextContent(type="text", text=result)]
+    except TelegramError as e:
+        return [TextContent(type="text", text=f"Telegram error: {str(e)}")]
+
+
 @app.list_tools()
 async def list_tools() -> list[Tool]:
     """List available Telegram tools"""
@@ -86,61 +130,6 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
     except Exception as e:
         logger.error(f"Error calling tool {name}: {e}")
         return [TextContent(type="text", text=f"Error: {str(e)}")]
-
-
-async def send_message(arguments: dict) -> list[TextContent]:
-    """Send a message to Telegram"""
-    chat_id = arguments.get("chat_id")
-    text = arguments.get("text")
-
-    if not chat_id or not text:
-        return [TextContent(type="text", text="Error: chat_id and text are required")]
-
-    try:
-        telegram_bot = get_bot()
-        message = await telegram_bot.send_message(chat_id=chat_id, text=text)
-
-        result = f"Message sent successfully!\nChat ID: {message.chat_id}\nMessage ID: {message.message_id}"
-        return [TextContent(type="text", text=result)]
-    except TelegramError as e:
-        return [TextContent(type="text", text=f"Telegram error: {str(e)}")]
-
-
-async def main():
-    """Run the MCP server"""
-    from mcp.server.stdio import stdio_server
-
-    async with stdio_server() as (read_stream, write_stream):
-        await app.run(read_stream, write_stream, app.create_initialization_options())
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
-
-
-async def get_updates(arguments: dict) -> list[TextContent]:
-    """Get recent updates from Telegram"""
-    limit = arguments.get("limit", 10)
-
-    try:
-        telegram_bot = get_bot()
-        updates = await telegram_bot.get_updates(limit=limit)
-
-        if not updates:
-            return [TextContent(type="text", text="No recent messages")]
-
-        result = "Recent messages:\n\n"
-        for update in updates[-limit:]:
-            if update.message:
-                msg = update.message
-                result += f"From: {msg.from_user.first_name} (@{msg.from_user.username})\n"
-                result += f"Chat ID: {msg.chat_id}\n"
-                result += f"Text: {msg.text}\n"
-                result += f"Date: {msg.date}\n\n"
-
-        return [TextContent(type="text", text=result)]
-    except TelegramError as e:
-        return [TextContent(type="text", text=f"Telegram error: {str(e)}")]
 
 
 async def main():

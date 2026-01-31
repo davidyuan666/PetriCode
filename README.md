@@ -1,57 +1,79 @@
-# TelegramBotMCP
+# Telegram Bot MCP Server
 
-Telegram Bot MCP Server - 为 Claude Code CLI 提供 Telegram 消息能力
+为 Claude Code CLI 提供 Telegram 消息收发能力的 MCP 服务器。
 
-## 功能特性
+## 功能
 
-这是一个 MCP (Model Context Protocol) 服务器，让 Claude Code CLI 可以：
 - 发送消息到 Telegram
 - 接收 Telegram 消息
-- 与 Telegram Bot 交互
+- 异步架构，高性能
 
 ## 安装
 
-1. 安装依赖:
 ```bash
+cd TelegramBotMCP
 pip install -r requirements.txt
 ```
 
-2. 配置环境变量:
+## 配置
+
+1. 创建 `.env` 文件：
 ```bash
-cp .env.example .env
-# 编辑 .env 文件，填入你的 Telegram Bot Token
+TELEGRAM_BOT_TOKEN=your_bot_token_here
 ```
 
-## 配置到 Claude Code CLI
-
-使用以下命令将此 MCP 服务器添加到 Claude Code CLI：
-
+2. 添加到 Claude Code CLI：
 ```bash
-claude mcp add telegram-bot -e TELEGRAM_BOT_TOKEN=XXXXXXX -- python C:\workspace\claudecodelabspace\TelegramBotMCP\mcp_server.py
+claude mcp add telegram-bot -e TELEGRAM_BOT_TOKEN=your_token -- python /path/to/mcp_server.py
 ```
 
-## 可用工具
+3. 验证：
+```bash
+claude mcp list
+```
 
-### 1. send_telegram_message
-发送消息到 Telegram 聊天
+## API
+
+### send_telegram_message
+发送消息到 Telegram。
 
 参数:
-- `chat_id`: Telegram 聊天 ID 或用户名 (例如: '@myautomaticagentbot')
-- `text`: 要发送的消息文本
+- `chat_id` (string): Chat ID，如 "123456789"
+- `text` (string): 消息内容
 
-### 2. get_telegram_updates
-获取最近的 Telegram 消息
+### get_telegram_updates
+获取最近的消息。
 
 参数:
-- `limit`: 获取的消息数量 (默认: 10)
+- `limit` (number): 消息数量，默认 10
 
-## 使用示例
+## 使用
 
-在 Claude Code CLI 中，你可以这样使用：
-
+在 Claude Code CLI 中直接使用自然语言：
 ```
-发送消息到我的 Telegram: "Hello from Claude Code!"
+发送消息到我的 Telegram (ID: 123456789): Hello!
 ```
 
-Claude Code 会自动调用 `send_telegram_message` 工具发送消息。
+## 获取 Chat ID
 
+向 Bot 发送消息后，运行：
+```bash
+python test_mcp.py
+```
+
+## 故障排除
+
+- **连接失败**: 检查 Python 和依赖安装
+- **发送失败**: 确认 Chat ID 格式正确
+- **无消息**: 确保已向 Bot 发送过消息
+
+## 技术栈
+
+- Python 3.8+
+- python-telegram-bot
+- MCP SDK
+- asyncio
+
+## 许可证
+
+MIT License
