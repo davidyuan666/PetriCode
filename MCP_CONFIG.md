@@ -2,28 +2,17 @@
 
 本文档说明如何在 Claude Code CLI 中配置 Telegram Sender MCP 服务器。
 
-## 项目架构说明
+## 项目说明
 
-本项目包含两个独立的组件：
+本项目是一个标准 MCP 服务器，为 Claude Code CLI 提供 Telegram 消息收发能力。
 
-### 1. MCP Server (`mcp_server.py`)
-**用途**: 标准 MCP 服务器，让 Claude Code CLI 可以调用 Telegram 功能
+### MCP Server (`mcp_server.py`)
 
 **功能**:
 - `send_telegram_message`: 发送消息到 Telegram
 - `get_telegram_updates`: 获取 Telegram 最近的消息
 
-**使用场景**: 在 Claude Code CLI 中执行命令，通过 MCP 工具发送 Telegram 消息
-
-### 2. Telegram Bridge (`telegram_bridge.py`)
-**用途**: 反向桥接，让 Telegram 消息触发 Claude Code CLI 执行
-
-**功能**:
-- 监听 Telegram 消息
-- 将收到的消息转发给 Claude Code CLI 执行
-- 将执行结果返回到 Telegram
-
-**使用场景**: 通过 Telegram 机器人远程控制 Claude Code CLI
+**使用场景**: 在 Claude Code CLI 中执行命令，通过 MCP 工具与 Telegram 交互
 
 ---
 
@@ -84,8 +73,6 @@ pip install -r requirements.txt
 
 ## 使用方法
 
-### 使用 MCP Server
-
 启动 Claude Code CLI 后，可以使用以下工具：
 
 **发送消息**:
@@ -98,24 +85,11 @@ Send a message "Hello from Claude!" to Telegram chat ID 123456789
 Get recent Telegram messages
 ```
 
-### 使用 Telegram Bridge
-
-运行桥接脚本：
-
-```bash
-cd TelegramSenderMCP
-python telegram_bridge.py
-```
-
-然后在 Telegram 中向你的机器人发送消息，机器人会将消息转发给 Claude Code CLI 执行。
-
 ---
 
 ## 测试
 
-### 测试 MCP Server
-
-运行测试脚本：
+运行测试脚本验证配置：
 
 ```bash
 cd TelegramSenderMCP
@@ -126,12 +100,6 @@ python test_bot.py
 - Bot 连接是否正常
 - 是否能获取 Bot 信息
 - 是否能获取最近的消息
-
-### 测试 Telegram Bridge
-
-1. 启动桥接脚本：`python telegram_bridge.py`
-2. 在 Telegram 中向机器人发送消息
-3. 查看机器人是否回复执行结果
 
 ---
 

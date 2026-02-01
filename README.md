@@ -2,20 +2,16 @@
 
 为 Claude Code CLI 提供 Telegram 消息收发能力的 MCP 服务器。
 
-## 项目结构
+## 项目说明
 
-本项目包含两个独立组件：
-
-1. **MCP Server** (`mcp_server.py`) - 标准 MCP 服务器，让 Claude Code CLI 调用 Telegram 功能
-2. **Telegram Bridge** (`telegram_bridge.py`) - 反向桥接，让 Telegram 消息触发 Claude Code CLI
+本项目是一个标准 MCP 服务器，为 Claude Code CLI 提供 Telegram 发送和接收消息的能力。
 
 详细配置请参考 [MCP_CONFIG.md](MCP_CONFIG.md)
 
 ## 功能
 
 - 发送消息到 Telegram
-- 接收 Telegram 消息
-- 双向通信：CLI → Telegram 和 Telegram → CLI
+- 获取 Telegram 最近消息
 - 异步架构，高性能
 
 ## 快速开始
@@ -78,15 +74,6 @@ TELEGRAM_BOT_TOKEN=your_bot_token_here
 ```
 获取最近的 Telegram 消息
 ```
-
-### 使用 Telegram Bridge
-
-启动桥接服务：
-```bash
-python telegram_bridge.py
-```
-
-然后在 Telegram 中向机器人发送消息，机器人会自动执行并返回结果。
 
 ## 测试
 
